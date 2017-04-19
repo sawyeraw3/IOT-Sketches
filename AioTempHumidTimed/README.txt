@@ -1,0 +1,2 @@
+AioTempHumidTimed.ino
+Written and tested with a NodeMCU V1.0 board and a DHT11 temperature and humidity sensor. Current time is retrieved from internet when board boots. Timekeeping is then handled by the board using Ruben Marc Speybrouck's clever and simple instructable code. Data is sent to Adafruit-IO feeds every minute. The code can be tuned easily to suit any use-case/preference.
