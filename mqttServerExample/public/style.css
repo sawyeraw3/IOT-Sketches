@@ -1,0 +1,42 @@
+html, body {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+}
+
+#header {
+  right: 0;
+  left: 0;
+}
+
+body {
+  max-width: 750px;
+  margin: auto;
+  text-align: center;
+  background: #193549;
+  color: white;
+  font-family: 'helvetica neue', sands-sarif;
+  font-weight: 100;
+  font-size: 25px;
+}
+
+.wrapper {
+  position: relative;
+  width: 600px; 
+  margin: 0 auto;
+  top: 30px;
+}
+
+.controls {
+  height: 500px;
+  width: 300px;
+  background-color: orange;
+}
+
+h4 {
+  margin: auto;
+}
+
+.controls {
+  max-width: 200px;
+  margin: auto;
+}

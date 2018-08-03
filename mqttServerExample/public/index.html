@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket IO Example</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+<body>
+  <div id="header">
+    <h1>Control esp8266 LEDs</h1>
+  </div>
+  <div class="wrapper">
+    
+    <div class="controls" id="espcontrols" name="esp1">
+      <h4>esp one</h4>
+      <div>
+        <label for="light1switch">I/O:</label>
+        <input id="light1switch" type="checkbox" name ="switch" checked="true">
+      </div>
+      <div>
+        <label for="changecolor">Color:</label>
+        <input id="changecolor" type="color" name="color" value="#ffc600">
+      </div>
+      <div>
+        <br/>
+        <label for="light1brightness">Light 1 Brightness:</label>
+        <input id="light1brightness" type="range" name="brightness" min="10" max="240" value="10">
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/index.js"></script>
+</body>
+</html>
