@@ -1,8 +1,8 @@
 /************************ Adafruit IO Config *******************************/
 // visit io.adafruit.com if you need to create an account,
 // or if you need your Adafruit IO key.
-#define IO_USERNAME    "Sawyeraw3"
-#define IO_KEY         "8c79ffb9b56448108d84904832ed8c62"
+#define IO_USERNAME    ""
+#define IO_KEY         ""
 
 /******************************* WIFI **************************************/
 // the AdafruitIO_WiFi client will work with the following boards:
@@ -16,8 +16,8 @@
 #define WIFI_PASS  "wrongwhole"
 */
 
-#define WIFI_SSID       "Cal224"
-#define WIFI_PASS       "FlirtinCurtin"
+#define WIFI_SSID       ""
+#define WIFI_PASS       ""
 
 
 // comment out the following two lines if you are using fona or ethernet
