@@ -34,8 +34,8 @@ const uint16_t Colors[] = {
   matrix.Color(0, 0, 0)  //orange/yellow
 };
 
-const char* ssid     = "Cal224";
-const char* password = "FlirtinCurtin";
+const char* ssid     = "";
+const char* password = "";
 bool f = false;
 int mWidth = matrix.width();
 WiFiServer server(80);
