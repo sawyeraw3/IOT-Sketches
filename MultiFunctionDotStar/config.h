@@ -11,14 +11,8 @@
 //   - Feather M0 WiFi -> https://www.adafruit.com/products/3010
 //   - Feather WICED -> https://www.adafruit.com/products/3056
 
-/*
-#define WIFI_SSID  "TrashHouse"
-#define WIFI_PASS  "wrongwhole"
-*/
-
 #define WIFI_SSID       ""
 #define WIFI_PASS       ""
-
 
 // comment out the following two lines if you are using fona or ethernet
 #include "AdafruitIO_WiFi.h"
