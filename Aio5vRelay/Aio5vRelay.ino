@@ -6,11 +6,6 @@
   #include <avr/power.h>
 #endif
 
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
-
 #define RELAY_PIN 5
 #define ONBOARD_LED 16
 
