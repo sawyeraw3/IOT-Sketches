@@ -1,37 +1,61 @@
-/************************ Adafruit IO Config *******************************/
-// visit io.adafruit.com if you need to create an account,
-// or if you need your Adafruit IO key.
-#define IO_USERNAME    "IO_USERNAME"
-#define IO_KEY         "IO_KEY"
+#ifndef CONFIG_H
+#define CONFIG_H
 
-/******************************* WIFI **************************************/
-// the AdafruitIO_WiFi client will work with the following boards:
-//   - HUZZAH ESP8266 Breakout -> https://www.adafruit.com/products/2471
-//   - Feather HUZZAH ESP8266 -> https://www.adafruit.com/products/2821
-//   - Feather M0 WiFi -> https://www.adafruit.com/products/3010
-//   - Feather WICED -> https://www.adafruit.com/products/3056
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
 
-#define WIFI_SSID       "SSID"
-#define WIFI_PASS       "PASS"
+#include <EEPROM.h>
 
-// comment out the following two lines if you are using fona or ethernet
+#include <WebOTA.h>
+#include <WiFiClient.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
 #include "AdafruitIO_WiFi.h"
-AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);
+#define IO_USERNAME    ""
+#define IO_KEY         ""
 
-/******************************* FONA **************************************/
-// the AdafruitIO_FONA client will work with the following boards:
-//   - Feather 32u4 FONA -> https://www.adafruit.com/product/3027
+#define WIFI_CHAR_ARRAY_SIZE 50
+#define WIFI_CRED_ADDR 0
+struct {
+  char WIFI_SSID[WIFI_CHAR_ARRAY_SIZE] = "";
+  char WIFI_PASS[WIFI_CHAR_ARRAY_SIZE] = "";
+} wifiCreds;
 
-// uncomment the following two lines for 32u4 FONA,
-// and comment out the AdafruitIO_WiFi client in the WIFI section
-// #include "AdafruitIO_FONA.h"
-// AdafruitIO_FONA io(IO_USERNAME, IO_KEY);
+AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, wifiCreds.WIFI_SSID, wifiCreds.WIFI_PASS);
+AdafruitIO_Feed *home_iot = io.feed("home_iot");
 
-/**************************** ETHERNET ************************************/
-// the AdafruitIO_Ethernet client will work with the following boards:
-//   - Ethernet FeatherWing -> https://www.adafruit.com/products/3201
+ESP8266WebServer server(80);
+bool connectedToWiFi = true;
 
-// uncomment the following two lines for ethernet,
-// and comment out the AdafruitIO_WiFi client in the WIFI section
-// #include "AdafruitIO_Ethernet.h"
-// AdafruitIO_Ethernet io(IO_USERNAME, IO_KEY);
+#define UPDATE_PORT 8080
+#define UPDATE_LINK "/update"
+#define RELAY_PIN 5
+#define ONBOARD_LED_PIN 16
+#define ESP_ID "esp0"
+#define ESP_AP_SSID "ESP_soft_AP"
+#define ESP_AP_PASS "password"
+#define CONN_ATTEMPT_DUR 30000
+
+const char HOME_PAGE_HTML[] PROGMEM = R"=====(
+<!DOCTYPE html>
+<html>
+<body>
+<h2>ESP AP Homepage</h2>
+<h3>Enter network credentials to attempt connection</h3>
+<form action="/wifi_credentials">
+  SSID:
+  <br>
+  <input type="text" name="ssid" value="">
+  <br>
+  Password:
+  <br>
+  <input type="text" name="password" value="">
+  <br>
+  <input type="submit" value="Submit">
+</form>
+</body>
+</html>
+)=====";
+#endif

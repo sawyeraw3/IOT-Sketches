@@ -1,75 +1,129 @@
 #include "config.h"
-#ifdef __AVR__
-  #include <avr/power.h>
-#endif
-
-#include <WebOTA.h>
-#include <ESP8266WiFi.h>
-
-#define UPDATE_PORT 8080
-#define UPDATE_LINK "/update"
-#define RELAY_PIN 5
-#define ONBOARD_LED 16
-#define ESP_ID "esp0"
-
-AdafruitIO_Feed *home_iot = io.feed("home_iot");
 
 void setup() {
   pinMode(RELAY_PIN, OUTPUT);
-  pinMode (ONBOARD_LED, OUTPUT);
+  pinMode (ONBOARD_LED_PIN, OUTPUT);
 
   Serial.begin (115200);
-  io.connect();
-  home_iot->onMessage(handleMessage);
-  
-  // Wait for a connection
-  while(io.status() < AIO_CONNECTED) {
-    Serial.print(".");
-    delay(10);
-  }
-
-  webota.init(UPDATE_PORT, UPDATE_LINK);
-  
-  // Successfully connected
   Serial.println();
-  Serial.println(io.statusText());
+  // Load values from memory
+  EEPROM.begin(512);
+  EEPROM.get(WIFI_CRED_ADDR, wifiCreds);
   
-  String intitializedStatusString = WiFi.localIP().toString() + ":" + UPDATE_PORT + UPDATE_LINK + " to update";
-  Serial.println(intitializedStatusString);
-
+  attemptWifiConnection();
+  
   // Set analogWrite range for ESP8266
-  #ifdef ESP8266
-    analogWriteRange(255);
-  #endif
-  delay(10);
-  // Outlet is connected to NC and powered when relay is off
-  // so LED indicates outlet 'on'
-  digitalWrite (ONBOARD_LED, 0);
-
-  home_iot->save((String)ESP_ID + " | " + intitializedStatusString);
+#ifdef ESP8266
+  analogWriteRange(255);
+#endif
 }
 
 void loop() {
-  io.run();
-  webota.handle();
+  if (connectedToWiFi) {
+    io.run();
+    webota.handle();
+  } else {
+    server.handleClient();
+  }
+}
+
+void attemptWifiConnection() {
+  Serial.println("Attempting to connect to AdafruitIO via: ");
+  Serial.println(wifiCreds.WIFI_SSID);
+
+  connectedToWiFi = timedConnectionAttempt();
+  if (connectedToWiFi) {
+    handleWifiConnected();
+  } else {
+    Serial.print("Connection as STA failed. Starting AP: ");
+    Serial.println(ESP_AP_SSID);
+    configureAndStartServer();
+  }
+}
+
+void configureAndStartServer() {
+  WiFi.mode(WIFI_AP);
+  Serial.println(WiFi.softAP(ESP_AP_SSID, ESP_AP_PASS) ? "AP Started" : "AP Failed");
+  Serial.println(WiFi.softAPIP());
+  server.on("/", handleRoot);
+  server.on("/wifi_credentials", handleWifiCredentials);
+  server.begin();
+}
+
+bool timedConnectionAttempt() {
+  WiFi.mode(WIFI_STA);
+  io.connect();
+  home_iot->onMessage(handleMessage);
+  unsigned long timeStartedConnectionAttempt = millis();
+  // Wait for a connection
+  while (io.status() < AIO_CONNECTED && millis() < timeStartedConnectionAttempt + CONN_ATTEMPT_DUR) {
+    delay(10);
+  }
+  Serial.println(io.statusText());
+  return (io.status() == AIO_CONNECTED);
+}
+
+void handleWifiConnected() {
+  webota.init(UPDATE_PORT, UPDATE_LINK);
+  String webotaStatusString =
+    WiFi.localIP().toString() + ":"
+    + UPDATE_PORT + UPDATE_LINK + " for "
+    + (String)ESP_ID;
+  Serial.println(webotaStatusString);
+  home_iot->save(webotaStatusString);
+}
+
+char** tokenizeStringOnDelimiter(char inputStr[], char* delim) {
+  char* tokens[] = {};
+  char* token = strtok(inputStr, delim);
+  int numTokens = 0;
+  while (token != NULL) {
+    tokens[numTokens] = token;
+    token = strtok(NULL, delim);
+    numTokens+=1;
+  }
+  return tokens;
 }
 
 void handleMessage(AdafruitIO_Data *data) {
-  String str = data->toString();
-  String targetEsp = str.substring(0, str.indexOf(":"));
-  int val = str.substring(str.indexOf(":") + 1).toInt();
-  if (targetEsp == ESP_ID) {
+  char** tokens = tokenizeStringOnDelimiter(data->toChar(), ":");
+  char* targetEsp = tokens[0];
+  if (!strcmp(targetEsp, ESP_ID)) {
+    int val = atoi(tokens[1]);
     handleRelayMessage(val);
   }
 }
 
+// Relay module connected to outlet via NC gate
+// ESP8266 onboard LED is reversed (...but in electrician speak)
 void handleRelayMessage(int i) {
-  if(i) {
-    // Relay turned on, so outlet is 'off'
-    digitalWrite (RELAY_PIN, 1);
-    digitalWrite (ONBOARD_LED, 1);
-  } else {
-    digitalWrite (RELAY_PIN, 0);
-    digitalWrite (ONBOARD_LED, 0);
-  }
+  digitalWrite (RELAY_PIN, i);
+  digitalWrite (ONBOARD_LED_PIN, i);
+}
+
+void handleRoot() {
+  String payload = HOME_PAGE_HTML;
+  server.send(200, "text/html", payload);
+}
+
+void handleWifiCredentials() {
+  String payload = "<h3>Attempting Connection to " + server.arg("ssid") + "</h3>";
+  server.send(200, "text/html", payload);
+  Serial.println(payload);
+  saveAndUpdateWifiCreds(server.arg("ssid"), server.arg("password"));
+  attemptWifiConnection();
+}
+
+//TODO
+// Security should be considered
+void saveAndUpdateWifiCreds(String newWifiSsid, String newWifiPass) {
+  // Update creds locally
+  char credCopyBuff[WIFI_CHAR_ARRAY_SIZE];
+  newWifiSsid.toCharArray(credCopyBuff, WIFI_CHAR_ARRAY_SIZE);
+  strcpy(wifiCreds.WIFI_SSID, credCopyBuff);
+  newWifiPass.toCharArray(credCopyBuff, WIFI_CHAR_ARRAY_SIZE);
+  strcpy(wifiCreds.WIFI_PASS, credCopyBuff);
+  // Save updated creds to memory
+  EEPROM.put(WIFI_CRED_ADDR, wifiCreds);
+  EEPROM.commit();
 }
