@@ -3,11 +3,10 @@
 
 // Determines functionality of esp
 // could instantiate in setup based on ESP_FUNCTION value
-EspFunctionality* espFunction = new RelayEspFunction(RELAY_PIN);
+EspFunctionality* espFunction = new RelayEspFunction(5);
 
 void setup() {
   espFunction->setUp();
-  pinMode (ONBOARD_LED_PIN, OUTPUT);
 
   Serial.begin (115200);
   Serial.println();

@@ -1,5 +1,6 @@
 class EspFunctionality {
   public:
+  int ONBOARD_LED_PIN = 16;
   virtual void setUp() {}
   virtual void performTask() {}
 };
@@ -8,6 +9,13 @@ class RelayEspFunction : public EspFunctionality {
   private:
   bool isOn = false;
   int relayPin;
+
+  void toggleRelayAndOboardLed() {
+    digitalWrite (relayPin, int(isOn));
+    digitalWrite(ONBOARD_LED_PIN, int(isOn));
+    isOn = !isOn;
+  }
+  
   public:
   RelayEspFunction(int pinVal) {
     relayPin = pinVal;
@@ -18,8 +26,6 @@ class RelayEspFunction : public EspFunctionality {
   }
   
   virtual void performTask() {
-    isOn ? digitalWrite (relayPin, 0) : digitalWrite(relayPin, 1);
-    isOn ? digitalWrite (16, 0) : digitalWrite(16, 1);
-    isOn = !isOn;
+    toggleRelayAndOboardLed();
   }
 };

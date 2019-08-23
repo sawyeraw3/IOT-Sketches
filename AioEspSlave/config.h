@@ -29,16 +29,13 @@ AdafruitIO_Feed *home_iot = io.feed("home_iot");
 ESP8266WebServer server(80);
 bool connectedToWiFi = true;
 
-#define UPDATE_PORT 8080
-#define UPDATE_LINK "/update"
-#define RELAY_PIN 5
-#define ONBOARD_LED_PIN 16
-// Used for sending commands, i.e. esp0:relay toggles relay
 #define ESP_ID "esp0"
 #define ESP_FUNCTION "relay"
 #define ESP_AP_SSID "ESP_soft_AP"
 #define ESP_AP_PASS "password"
 #define CONN_ATTEMPT_DUR 30000
+#define UPDATE_PORT 8080
+#define UPDATE_LINK "/update"
 
 const char HOME_PAGE_HTML[] PROGMEM = R"=====(
 <!DOCTYPE html>
@@ -46,7 +43,7 @@ const char HOME_PAGE_HTML[] PROGMEM = R"=====(
 <body>
 <h2>ESP AP Homepage</h2>
 <h3>Enter network credentials to attempt connection</h3>
-<form action="/wifi_credentials">
+<form action="/wifi_credentials" autocomplete="off">
   SSID:
   <br>
   <input type="text" name="ssid" value="">
