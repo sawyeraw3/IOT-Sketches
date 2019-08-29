@@ -30,6 +30,7 @@ ESP8266WebServer server(80);
 bool connectedToWiFi = true;
 
 #define ESP_ID "esp0"
+//TODO eventually, we want multifunctionality
 #define ESP_FUNCTION "relay"
 #define ESP_AP_SSID "ESP_soft_AP"
 #define ESP_AP_PASS "password"
@@ -54,6 +55,16 @@ const char HOME_PAGE_HTML[] PROGMEM = R"=====(
   <br>
   <input type="submit" value="Submit">
 </form>
+</body>
+</html>
+)=====";
+
+const char CONN_ATMPT_HTML[] PROGMEM = R"=====(
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Credentials Submitted</h2>
+<h3>Attempting Connection to " + server.arg("ssid") + "</h3>
 </body>
 </html>
 )=====";

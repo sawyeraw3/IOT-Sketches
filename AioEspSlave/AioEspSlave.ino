@@ -13,13 +13,13 @@ void setup() {
   // Load values from memory
   EEPROM.begin(512);
   EEPROM.get(WIFI_CRED_ADDR, wifiCreds);
-  
+
   attemptWifiConnection();
-  
   // Set analogWrite range for ESP8266
 #ifdef ESP8266
   analogWriteRange(255);
 #endif
+
 }
 
 void loop() {
@@ -77,25 +77,28 @@ void handleWifiConnected() {
   home_iot->save(webotaStatusString);
 }
 
-char** tokenizeStringOnDelimiter(char inputStr[], char* delim) {
-  char* tokens[] = {};
+const char** tokenizeStringOnDelimiter(char inputStr[], char* delim, int &numTokens) {
+  const char* tokens[] = {};
   char* token = strtok(inputStr, delim);
-  int numTokens = 0;
   while (token != NULL) {
     tokens[numTokens] = token;
     token = strtok(NULL, delim);
-    numTokens+=1;
+    numTokens += 1;
   }
   return tokens;
 }
 
 void handleMessage(AdafruitIO_Data *data) {
-  char** tokens = tokenizeStringOnDelimiter(data->toChar(), ":");
-  char* targetEsp = tokens[0];
-  if (!strcmp(targetEsp, ESP_ID)) {
-    char* targetFunction = tokens[1];
-    if (!strcmp(targetFunction, ESP_FUNCTION)) {
-      espFunction->performTask();
+  int numTokens = 0;
+  const char** tokens = tokenizeStringOnDelimiter(data->toChar(), ":", numTokens);
+  if (numTokens >= 2) {
+    const char* targetEsp = tokens[0];
+    const char* targetFunction = tokens[1];
+    tokens = (numTokens > 2) ? tokens + 2 : NULL;
+    if (!strcmp(targetEsp, ESP_ID)) {
+      if (!strcmp(targetFunction, ESP_FUNCTION)) {
+        espFunction->performTask(tokens);
+      }
     }
   }
 }
@@ -106,15 +109,14 @@ void handleRoot() {
 }
 
 void handleWifiCredentials() {
-  String payload = "<h3>Attempting Connection to " + server.arg("ssid") + "</h3>";
+  String payload = CONN_ATMPT_HTML;
   server.send(200, "text/html", payload);
   Serial.println(payload);
   saveAndUpdateWifiCreds(server.arg("ssid"), server.arg("password"));
   attemptWifiConnection();
 }
 
-//TODO
-// Security should be considered
+//TODO Security should be considered when passing credentials arround...
 void saveAndUpdateWifiCreds(String newWifiSsid, String newWifiPass) {
   // Update creds locally
   char credCopyBuff[WIFI_CHAR_ARRAY_SIZE];
