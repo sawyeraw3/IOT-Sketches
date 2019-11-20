@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>ESP8266 Weather Data</title>
+  <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8" src="{{ url_for('static', filename='index.js') }}"></script>
+</head>
+
+<body>
+  <h1>ESP8266 DHT Sensor Data</h1>
+  <h3>Incoming Datapoints</h3>
+  <table id="incomingdatatable" class="table table-hover">
+    <tr><th>Entry ID</th>
+    <th>Date @ Time (Received)</th>
+    <th>Temperature (&#8457) | Humidity (%)</th>
+    <th>Origin Device</th></tr>
+    <tr></tr>
+  </table>
+  <h3>Previous 20 Datapoints</h3>
+  <table id="datatable" class="table table-hover">
+    <tr><th>Entry ID</th>
+    <th>Date @ Time (Received)</th>
+    <th>Temperature (&#8457) | Humidity (%)</th>
+    <th>Origin Device</th></tr>
+    {% for entry in dht_readings %}
+      <tr><td>{{ entry.id }}</td>
+      <td>{{ entry.currentdate }} @ {{ entry.currenttime }}</td>
+      <td>{{ entry.temperature }} | {{ entry.humidity }}</td>
+      <td>{{ entry.device }}</td></tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
